@@ -70,7 +70,7 @@ export default function MemorialsPage() {
             try {
                 const data = await fetchMemoriais();
                 if (isMounted) {
-                    setMemoriais(data);
+                    setMemoriais(Array.isArray(data) ? data : []);
                 }
             } catch (error) {
                 console.error('Erro ao carregar memoriais:', error);
