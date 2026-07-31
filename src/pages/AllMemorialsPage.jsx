@@ -91,7 +91,7 @@ export default function MemorialsPage() {
         };
     }, []);
 
-    const todosMemoriais = memoriais;
+    const todosMemoriais = Array.isArray(memoriais) ? memoriais : [];
     const personalidadesImportantes = todosMemoriais.filter(m => m.tipo === 'historica');
     const memoriaisRecentes = todosMemoriais.filter(m => m.tipo === 'recente');
 
