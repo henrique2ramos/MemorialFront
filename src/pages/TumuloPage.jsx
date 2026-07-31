@@ -1,7 +1,40 @@
 import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { MapPin, Quote, Star, User } from 'lucide-react';
-import { getMemoriaisPorTumulo } from '../data/memoriaisStorage';
+import { fetchMemoriais, resolveImageUrl } from '../lib/api';
 import styles from './TumuloPage.module.css';
+
+function extractQuadra(loc) {
+  const match = loc?.match(/Quadra\s+([A-Za-z0-9]+)/i);
+  return match ? match[1].trim().toUpperCase() : null;
+}
+
+function extractLote(loc) {
+  const match = loc?.match(/Lote\s+([A-Za-z0-9]+)/i);
+  return match ? match[1].trim() : null;
+}
+
+function normalize(loc) {
+  return (loc || '').replace(/\s+/g, ' ').trim().toLowerCase();
+}
+
+function getMemoriaisPorTumulo(memoriais, localizacao) {
+  const targetQuadra = extractQuadra(localizacao);
+  const targetLote = extractLote(localizacao);
+
+  return (Array.isArray(memoriais) ? memoriais : []).filter((m) => {
+    const memQuadra = extractQuadra(m.localizacao);
+    if (!memQuadra) return false;
+
+    if (targetQuadra && targetLote) {
+      return memQuadra === targetQuadra && extractLote(m.localizacao) === targetLote;
+    }
+    if (targetQuadra) {
+      return memQuadra === targetQuadra;
+    }
+    return normalize(m.localizacao) === normalize(localizacao);
+  });
+}
 
 export default function TumuloPage() {
   const { localizacao } = useParams();
@@ -10,7 +43,42 @@ export default function TumuloPage() {
     catch { return localizacao || ''; }
   })();
 
-  const pessoas = getMemoriaisPorTumulo(decoded);
+  const [pessoas, setPessoas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    fetchMemoriais()
+      .then((data) => {
+        if (isMounted) setPessoas(getMemoriaisPorTumulo(data, decoded));
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar memoriais do túmulo:', error);
+        if (isMounted) setPessoas([]);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [decoded]);
+
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <section className={styles.mainSection}>
+            <div className={styles.card} style={{ padding: '48px', textAlign: 'center' }}>
+              <h2>Carregando...</h2>
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
 
   if (pessoas.length === 0) {
     return (
@@ -53,7 +121,7 @@ export default function TumuloPage() {
             >
               <div className={styles.personImage}>
                 {pessoa.imagem ? (
-                  <img src={pessoa.imagem} alt={pessoa.nome} />
+                  <img src={resolveImageUrl(pessoa.imagem)} alt={pessoa.nome} />
                 ) : (
                   <User size={40} className={styles.userIcon} />
                 )}
