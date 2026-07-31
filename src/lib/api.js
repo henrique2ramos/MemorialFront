@@ -52,7 +52,7 @@ async function request(path, options = {}) {
 }
 
 export async function fetchMemoriais() {
-  const data = await request('/memoriais');
+  const data = await request('/api/memoriais');
 
   console.log('=== RESPOSTA DA API ===');
   console.log(data);
@@ -68,18 +68,18 @@ export async function fetchMemoriais() {
 }
 
 export async function fetchMemorialById(id) {
-  return request(`/memoriais/${id}`);
+  return request(`/api/memoriais/${id}`);
 }
 
 export async function loginAdmin(email, password) {
-  return request('/login', {
+  return request('/api/login', {
     method: 'POST',
     body: { email, password },
   });
 }
 
 export async function createMemorial(payload, token) {
-  return request('/memoriais', {
+  return request('/api/memoriais', {
     method: 'POST',
     body: payload,
     authToken: token,
@@ -87,7 +87,7 @@ export async function createMemorial(payload, token) {
 }
 
 export async function updateMemorial(id, payload, token) {
-  return request(`/memoriais/${id}`, {
+  return request(`/api/memoriais/${id}`, {
     method: 'PUT',
     body: payload,
     authToken: token,
@@ -95,7 +95,7 @@ export async function updateMemorial(id, payload, token) {
 }
 
 export async function deleteMemorial(id, token) {
-  return request(`/memoriais/${id}`, {
+  return request(`/api/memoriais/${id}`, {
     method: 'DELETE',
     authToken: token,
   });
