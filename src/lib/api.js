@@ -52,7 +52,13 @@ async function request(path, options = {}) {
 }
 
 export async function fetchMemoriais() {
-  return request('/memoriais');
+  const data = await request('/memoriais');
+
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.memoriais)) return data.memoriais;
+  if (Array.isArray(data?.data)) return data.data;
+
+  return [];
 }
 
 export async function fetchMemorialById(id) {
