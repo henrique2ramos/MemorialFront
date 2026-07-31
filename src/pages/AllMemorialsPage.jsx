@@ -109,7 +109,7 @@ export default function MemorialsPage() {
         if (!query) return list;
 
         return list.filter(memorial =>
-            memorial.nome.toLowerCase().includes(query)
+            typeof memorial.nome === 'string' && memorial.nome.toLowerCase().includes(query)
         );
     }, [searchQuery, activeFilter, personalidadesImportantes, memoriaisRecentes, todosMemoriais]);
 
